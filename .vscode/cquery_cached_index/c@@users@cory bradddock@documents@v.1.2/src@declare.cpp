@@ -1,7 +1,7 @@
 #include "main.h"
 #include "chassisLib.h"
 
-chassisStandard drive(-6,-7,10,9,3, 4.125, 9.75,.429,20,20); //chassisLib declare
+chassisStandard drive(-6,-7,10,9,3, 4.0768, 9.8634,.429,20,20); //chassisLib declare
 pros::Controller master (pros::E_CONTROLLER_MASTER);
 
 pros::Motor intake1(2, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
