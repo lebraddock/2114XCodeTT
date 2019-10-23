@@ -146,7 +146,7 @@ drive.resetRightEncoder();
 			ttotalError = 0;
 		tlastSign = tsign;
 		tpower = terror * tkp + tki * ttotalError;
-		if(terror > 320)
+		if(terror > 220)
 			tpower = 127;
 		tilter.move(tpower);
 		//tilter pi loop ^^^^

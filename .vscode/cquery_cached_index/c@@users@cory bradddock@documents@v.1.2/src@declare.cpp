@@ -14,14 +14,14 @@ pros::ADIDigitalIn liftSense('a');
 pros::ADIAnalogIn lineSense('b');
 
 int startPos = 1;
-int finalPos = 560;
+int finalPos = 563;
 
 int restPos = 5;
 int lowTower = 380;
 int highTower = 470;
 
 double tkp = .2;
-double tki = .0018;
+double tki = .0015;
 
 bool tray = true;
 int ttarget = startPos;
@@ -37,7 +37,7 @@ int signchk(double number)
 
 bool isCube()
 {
-  if(lineSense.get_value() < 2450)
+  if(lineSense.get_value() < 400)
     return true;
   else
     return false;
