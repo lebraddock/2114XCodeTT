@@ -17,14 +17,15 @@
 
 void intakeThing()
 {
+
 	intake1.move(127);
 	intake2.move(127);
 	pros::delay(250);
-	lift.move(127);
-	pros::delay(55);
+	lift.move(100);
+	pros::delay(55); //55 -- og value how much it goes down
 	intake1.move(-127);
 	intake2.move(-127);
-	pros::delay(240);
+	pros::delay(250);
 	intake1.move(0);
 	intake2.move(0);
 }
@@ -41,7 +42,12 @@ void liftControl (void * param)
     }
     else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_R2))
     {
-			if(lift.get_position() > 100)
+			if(lift.get_position() > 400)
+			{
+				intake1.move(-127);
+				intake2.move(-127);
+			}
+			else if(lift.get_position() > 100)
 			{
 				intake1.move(-80);
 				intake2.move(-80);
@@ -86,8 +92,7 @@ void liftControl (void * param)
 		{
 			lift.move(-10);
 		}
-		pros::lcd::print(0, "pos : %d", lineSense.get_value());
-
+		pros::lcd::print(0, "pos : %d", intakeSense.get_value());
 
 		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B) && tray == true)
 		{
@@ -132,6 +137,7 @@ drive.resetRightEncoder();
 		drive.tankDrive(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y), master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
 		pros::lcd::print(2, "lpos : %f", drive.getLeftEncoder());
     pros::lcd::print(3, "rpos : %f", drive.getRightEncoder());
+
 
 		int avgDrive = drive.getLeftVelocity();
 

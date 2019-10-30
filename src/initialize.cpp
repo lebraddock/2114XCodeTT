@@ -1,6 +1,39 @@
 #include "main.h"
 #include "includeStuff.h"
 
+void printScreen(int num)
+{
+if(num == 1)
+{
+pros::lcd::print(0, "RED");
+pros::lcd::print(1, "Big Stack");
+pros::lcd::print(2, "Stack 8");
+}
+if(num == 2)
+{
+pros::lcd::print(0, "RED");
+pros::lcd::print(1, "Collect");
+pros::lcd::print(2, "Collect no score");
+}
+if(num == 3)
+{
+pros::lcd::print(0, "BLUE");
+pros::lcd::print(1, "Big Stack");
+pros::lcd::print(2, "Stack 8");
+}
+if(num == 4)
+{
+pros::lcd::print(0, "BLUE");
+pros::lcd::print(1, "Collect");
+pros::lcd::print(2, "Collect no score");
+}
+if(num == 5)
+{
+pros::lcd::print(0, "SKILLS");
+pros::lcd::print(1, "SKILLS");
+pros::lcd::print(2, "SKILLS");
+}
+}
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -16,6 +49,8 @@ void initialize() {
 
 	intake1.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 intake2.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+
+
 
 }
 
@@ -35,4 +70,39 @@ void disabled() {}
  * This task will exit when the robot is enabled and autonomous or opcontrol
  * starts.
  */
-void competition_initialize() {}
+void competition_initialize() {
+		bool lcdBool = true;
+	while(lcdBool)
+	{
+
+while(lcdBool)
+{
+if(pros::lcd::read_buttons() == LCD_BTN_RIGHT || rightClick.get_value() == 1)
+{
+	if(autoNum == 5)
+	autoNum = 1;
+	else
+	autoNum++;
+	pros::delay(300);
+}
+if(pros::lcd::read_buttons() == LCD_BTN_LEFT || leftClick.get_value() == 1)
+{
+	if(autoNum == 1)
+	autoNum = 5;
+	else
+	autoNum--;
+	pros::delay(300);
+}
+if(pros::lcd::read_buttons() == LCD_BTN_CENTER)
+{
+	lcdBool = false;
+	pros::delay(300);
+}
+ printScreen(autoNum);
+pros::delay(20);
+}
+pros::lcd::print(5, "////////////////////////");
+pros::lcd::print(6, "//AUTONOMOUS SELECTED!//");
+pros::lcd::print(7, "////////////////////////");
+	}
+}

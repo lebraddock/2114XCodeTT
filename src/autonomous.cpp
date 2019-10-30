@@ -43,16 +43,35 @@ void followBluePath()
   }
   drive.stopDriveVelocity();
 }
+void followRedPath()
+{
+  int i = 0;
+  int startTime = pros::millis();
+  int targetTime = pros::millis() + (264 * 10);
+  drive.resetLeftEncoder();
+  drive.resetRightEncoder();
+  while(pros::millis() < targetTime)
+  {
+    i = (pros::millis() - startTime) / 10;
+    drive.setRightVelocity(-1 * (blueLeftArray[i] + blueLeftArray[i+1]) / 2);
+    drive.setLeftVelocity(-1 * (blueRightArray[i] + blueRightArray[i+1]) / 2);
+    pros::delay(10);
+  }
+  drive.stopDriveVelocity();
+}
 
 void liftHigh()
 {
-  intakeThing();
+  if(isCube() == true)
+    intakeThing();
   lift.move_absolute(highTower, 100);
   liftDown = false;
 }
+
 void liftMed()
 {
-  intakeThing();
+  if(isCube() == true)
+    intakeThing();
   lift.move_absolute(lowTower, 100);
   liftDown = false;
 }
@@ -121,7 +140,7 @@ void deploy()
   ttarget = finalPos;
   setIntake(0);
   pros::delay(50);
-  setIntake(100);
+  setIntake(85);
   pros::delay(350);
   setIntake(60);
   pros::delay(1000);
@@ -133,17 +152,43 @@ void deploy()
 }
 
 
-void autonomous()
+void redStack()
 {
-  pros::Task angle (trayControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
-                TASK_STACK_DEPTH_DEFAULT, "Tary");
-                drive.resetLeftEncoder();
-                drive.resetRightEncoder();
-
-
-
   setIntake(-127);
+  pros::delay(220);
+  setIntake(0);
+  pros::delay(150);
+  setIntake(127);
   pros::delay(250);
+  drive.driveForward(43,30,70);
+  setIntake(0);
+  followRedPath();
+  setIntake(127);
+  drive.driveForward(37, 35, 60);
+  pros::delay(500);
+  setIntake(0);
+  drive.turnRight(149, 25, 18);
+  drive.driveForward(46, 40, 35);
+  setIntake(-127);
+  pros::delay(150);
+  drive.setLeftDrive(20);
+  drive.setRightDrive(20);
+  deploy();
+  setIntake(-127);
+  drive.driveBackward(24, 50, 100);
+}
+
+void redCollect()
+{
+
+}
+
+void blueStack()
+{
+  setIntake(-127);
+  pros::delay(220);
+  setIntake(0);
+  pros::delay(150);
   setIntake(127);
   pros::delay(250);
   drive.driveForward(43,30,70);
@@ -162,6 +207,147 @@ void autonomous()
   deploy();
   setIntake(-127);
   drive.driveBackward(24, 50, 100);
+}
+
+void blueCollect()
+{
+  liftHigh();
+  drive.driveForward(40, 30, 60);
+  pros::delay(200);
+  drive.driveBackward(15, 20, 40);
+  liftLow();
+  setIntake(127);
+  drive.driveForward(19, 20, 40);
+  pros::delay(1000);
+  setIntake(0);
+  drive.turnLeft(90, 35, 50);
+  setIntake(127);
+  drive.driveForward(14, 30, 50);
+  pros::delay(1000);
+  setIntake(0);
+  drive.turnLeft(90, 30, 60);
+  setIntake(127);
+  drive.driveForward(14, 30, 50);
+}
+
+void skills()
+{
+
+  liftLow();
+  setIntake(127);
+  drive.driveForward(41, 30, 50);
+  pros::delay(1000);
+  setIntake(0);
+  drive.turnRight(26, 25, 40);
+  liftMed();
+  pros::delay(1200);
+  drive.driveForward(9, 10, 20);
+  setIntake(-90);
+  pros::delay(500);
+  setIntake(0);
+  drive.driveBackward(10, 25, 50);
+  liftLow();
+  pros::delay(1000);
+  drive.turnLeft(150, 20, 40);
+  liftMed();
+  pros::delay(1200);
+  drive.driveForward(14, 20, 30);
+  setIntake(-90);
+  pros::delay(500);
+  setIntake(0);
+  drive.driveBackward(10, 20, 30);
+  drive.turnRight(90, 30, 50);
+  liftLow();
+  drive.driveBackward(45, 35, 50);
+  drive.turnRight(40, 25, 35);
+  setIntake(127);
+  drive.driveForward(36, 35, 50);
+  pros::delay(1000);
+  setIntake(0);
+  drive.turnLeft(152, 25, 18);
+  drive.driveForward(48, 40, 35);
+  setIntake(-127);
+  pros::delay(150);
+  drive.setLeftDrive(20);
+  drive.setRightDrive(20);
+  deploy();
+
+  setIntake(-127);
+  drive.driveBackward(20, 50, 100);
+  drive.turnLeft(170, 30, 40);
+  setIntake(127);
+  drive.driveForward(16, 40, 70);
+  pros::delay(300);
+  setIntake(-40);
+  pros::delay(330);
+  setIntake(0);
+  drive.driveBackward(6, 13, 20);
+  liftHigh();
+  drive.driveForward(12, 16, 20);
+  setIntake(-127);
+  pros::delay(600);
+  setIntake(0);
+  drive.driveBackward(8, 23, 40);
+  liftLow();
+  drive.turnLeft(90, 30, 50);
+  drive.driveBackward(20, 13, 30);
+
+
+  setIntake(127);
+  drive.driveForward(96, 42, 60);
+  pros::delay(200);
+  setIntake(0);
+  drive.turnRight(70, 30, 50);
+  liftHigh();
+  pros::delay(600);
+  drive.driveForward(10, 13, 20);
+  setIntake(-127);
+  pros::delay(500);
+  drive.driveBackward(6, 12, 20);
+  setIntake(0);
+  drive.turnRight(90, 30, 40);
+  liftLow();
+  drive.driveBackward(24, 35, 60);
+  drive.turnRight(33, 30, 50);
+  setIntake(127);
+  drive.driveForward(30, 35, 60);
+  pros::delay(300);
+  setIntake(0);
+  drive.driveBackward(30, 35,60);
+  drive.turnRight(65, 30, 50);
+  liftMed();
+  drive.driveForward(13, 13, 20);
+  setIntake(-127);
+  pros::delay(300);
+  drive.driveBackward(13, 23, 50);
+  drive.turnRight(70, 20, 30);
+  drive.driveForward(16, 20, 30);
+  deploy();
+  setIntake(-127);
+  drive.driveBackward(24, 40, 70);
+}
+
+
+
+
+void autonomous()
+{
+  pros::Task angle (trayControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
+                TASK_STACK_DEPTH_DEFAULT, "Tary");
+                drive.resetLeftEncoder();
+                drive.resetRightEncoder();
+
+  if(autoNum == 1)
+    redStack();
+  if(autoNum == 2)
+    redCollect();
+  if(autoNum == 3)
+    blueStack();
+  if(autoNum == 4)
+    blueCollect();
+  if(autoNum == 5)
+    skills();
+
 
 
 }
