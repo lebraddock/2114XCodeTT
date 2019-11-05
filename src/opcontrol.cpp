@@ -18,7 +18,8 @@
 void intakeThing()
 {
 
-
+	intakeBool = false;
+	pros::delay(20);
 	intake1.move(-127);
 	intake2.move(-127);
 	pros::delay(10);
@@ -28,6 +29,7 @@ void intakeThing()
 	pros::delay(200);
 	intake1.move(0);
 	intake2.move(0);
+	intakeBool = true;
 }
 void trayIntake()
 {
@@ -43,6 +45,8 @@ void intakeControl(void * param)
 {
 	while(true)
 	{
+		while(intakeBool == true)
+		{
 		if(trayBool == true)
 			{
 				trayIntake();
@@ -76,6 +80,9 @@ void intakeControl(void * param)
 			intake1.move(0);
 			intake2.move(0);
 		}
+		pros::delay(20);
+	}
+	pros::delay(20);
 	}
 }
 void liftControl (void * param)

@@ -28,6 +28,7 @@ double tkp = .2;
 double tki = .0015;
 
 bool tray = true;
+bool intakeBool = true;
 bool trayBool = false;
 int trayTime = 0;
 int ttarget = startPos;
