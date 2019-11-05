@@ -19,6 +19,7 @@ extern double tkp;
 extern double tki;
 
 extern int startPos;
+extern int trayTime;
 extern int finalPos;
 extern int restPos;
 extern int lowTower;
@@ -27,7 +28,7 @@ extern int signchk(double num);
 extern bool isCube();
 extern bool isIntake();
 extern int autoNum;
-
+extern bool trayBool;
 extern bool tray;
 extern int ttarget;
 extern bool liftDown;
