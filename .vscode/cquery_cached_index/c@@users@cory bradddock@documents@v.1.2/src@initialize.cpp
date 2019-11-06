@@ -45,6 +45,7 @@ void initialize() {
 	tilter.tare_position();
 	lift.tare_position();
 	lift.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
+	tilter.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
 	pros::lcd::initialize();
 
 	intake1.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);

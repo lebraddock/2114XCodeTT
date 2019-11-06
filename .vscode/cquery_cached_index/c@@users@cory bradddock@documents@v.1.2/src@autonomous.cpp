@@ -119,7 +119,7 @@ void liftLow()
      ttotalError = 0;
    tlastSign = tsign;
    tpower = terror * tkp + tki * ttotalError;
-   if(terror > 220)
+   if(terror > 170)
      tpower = 127;
    tilter.move(tpower);
    pros::delay(20);
@@ -135,17 +135,21 @@ void setIntake(int v)
 
 void deploy()
 {
+  int timeOut = pros::millis() + 700;
   setIntake(-127);
-  pros::delay(220);
+  while(!(isIntake()) && pros::millis() < timeOut)
+  {
+    pros::delay(20);
+  }
   ttarget = finalPos;
   setIntake(0);
   pros::delay(50);
   setIntake(85);
   pros::delay(350);
   setIntake(60);
-  pros::delay(1000);
+  pros::delay(800);
     setIntake(0);
-    pros::delay(1000);
+    pros::delay(800);
   ttarget = startPos;
 
   pros::delay(300);
@@ -185,28 +189,44 @@ void redCollect()
 
 void blueStack()
 {
+  int targetTime = pros::millis() + 15000;
+  while(pros::millis() < targetTime)
+  {
   setIntake(-127);
-  pros::delay(220);
+  pros::delay(160);
   setIntake(0);
-  pros::delay(150);
+  pros::delay(350);
   setIntake(127);
-  pros::delay(250);
+  pros::delay(100);
+  liftLow();
   drive.driveForward(43,30,70);
   setIntake(0);
   followBluePath();
   setIntake(127);
-  drive.driveForward(37, 35, 60);
-  pros::delay(500);
+  drive.driveForward(38, 35, 60);
+  pros::delay(200);
   setIntake(0);
   drive.turnLeft(149, 25, 18);
-  drive.driveForward(46, 40, 35);
+  setIntake(-127);
+  int timeOut = pros::millis() + 700;
+  while(!(isIntake()) && pros::millis() < timeOut)
+  {
+    pros::delay(20);
+  }
+  setIntake(127);  pros::delay(50);setIntake(0);
+  drive.driveForward(47, 40, 50);
   setIntake(-127);
   pros::delay(150);
   drive.setLeftDrive(20);
   drive.setRightDrive(20);
   deploy();
-  setIntake(-127);
+  setIntake(-90);
   drive.driveBackward(24, 50, 100);
+}
+drive.stopDriveMotors();
+setIntake(0);
+tilter.move(0);
+lift.move(0);
 }
 
 void blueCollect()
@@ -232,8 +252,8 @@ void blueCollect()
 
 void skills()
 {
-
-  liftLow();
+  deploy();
+  /*liftLow();
   setIntake(127);
   drive.driveForward(41, 30, 50);
   pros::delay(1000);
@@ -325,6 +345,7 @@ void skills()
   deploy();
   setIntake(-127);
   drive.driveBackward(24, 40, 70);
+  */
 }
 
 

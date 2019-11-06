@@ -32,5 +32,6 @@ extern bool trayBool;
 extern bool tray;
 extern int ttarget;
 extern bool liftDown;
+extern bool intakeBool;
 extern void intakeThing();
 #endif

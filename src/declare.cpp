@@ -4,8 +4,8 @@
 chassisStandard drive(-6,-7,10,9,3, 4.0768, 9.8634,.429,20,20); //chassisLib declare
 pros::Controller master (pros::E_CONTROLLER_MASTER);
 
-pros::Motor intake1(1, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor intake2(2, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor intake1(2, pros::E_MOTOR_GEARSET_18, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor intake2(1, pros::E_MOTOR_GEARSET_18, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor tilter(8, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor lift(3, pros::E_MOTOR_GEARSET_36, false, pros::E_MOTOR_ENCODER_DEGREES);
 
@@ -25,7 +25,7 @@ int lowTower = 350;
 int highTower = 470;
 
 double tkp = .2;
-double tki = .0015;
+double tki = .0018;
 
 bool tray = true;
 bool intakeBool = true;
