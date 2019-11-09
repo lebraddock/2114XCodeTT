@@ -166,7 +166,7 @@ void liftControl (void * param)
 		{
 			lift.move(-10);
 		}
-		pros::lcd::print(0, "pos : %d", intakeSense.get_value());
+		pros::lcd::print(0, "pos : %d", lineSense.get_value());
 
 
 

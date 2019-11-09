@@ -18,14 +18,17 @@ pros::ADIDigitalIn leftClick('e');
 pros::ADIAnalogIn intakeSense('d');
 
 int startPos = 1;
-int finalPos = 563;
+int finalPos = 558;
+int midPos = 270;
 
 int restPos = 5;
-int lowTower = 350;
+int lowTower = 360;
 int highTower = 470;
 
 double tkp = .2;
-double tki = .0018;
+double atkp = .21;
+double tki = .0012;
+double atki = .0014;
 
 bool tray = true;
 bool intakeBool = true;

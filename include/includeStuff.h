@@ -17,8 +17,11 @@ extern pros::ADIDigitalIn intakeSense;
 
 extern double tkp;
 extern double tki;
+extern double atkp;
+extern double atki;
 
 extern int startPos;
+extern int midPos;
 extern int trayTime;
 extern int finalPos;
 extern int restPos;
@@ -30,6 +33,7 @@ extern bool isIntake();
 extern int autoNum;
 extern bool trayBool;
 extern bool tray;
+extern bool trayS;
 extern int ttarget;
 extern bool liftDown;
 extern bool intakeBool;

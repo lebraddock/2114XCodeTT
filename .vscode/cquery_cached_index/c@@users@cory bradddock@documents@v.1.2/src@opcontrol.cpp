@@ -75,6 +75,16 @@ void intakeControl(void * param)
 			intake2.move(-127);
 			}
 		}
+		else if(ttarget == startPos && lift.get_position() > 75 && isCube())
+		{
+			intake1.move(0);
+			intake2.move(0);
+		}
+		else if(ttarget == startPos && lift.get_position() < 75 && isCube())
+		{
+			intake1.move(10);
+			intake2.move(10);
+		}
 		else
 		{
 			intake1.move(0);
@@ -94,6 +104,10 @@ void liftControl (void * param)
 
 		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_L1))
 			{
+					ttarget = startPos;//tray
+					tray = true;
+					if(tilter.get_position() > 30)
+						pros::delay(500);
 					if(isCube() == true)
 						intakeThing();
 					lift.move_absolute(highTower, 127);
@@ -102,6 +116,10 @@ void liftControl (void * param)
 				}
 		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT))
 				{
+					ttarget = startPos;//tray
+					tray = true;
+					if(tilter.get_position() > 30)
+						pros::delay(500);
 					if(isCube() == true)
 						intakeThing();
 					lift.move_absolute(lowTower, 127);
@@ -118,19 +136,25 @@ void liftControl (void * param)
 				liftDown = true;
 				lift.tare_position();
 			}
-		if(liftDown == true && lift.get_position() < 15)
+		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN) && ttarget == startPos)
 		{
-			lift.move(-10);
-		}
-		pros::lcd::print(0, "pos : %d", lineSense.get_value());
+			ttarget = midPos;//tray
 
-		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B) && tray == true)
+			pros::delay(300);
+		}
+		else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN) && ttarget == midPos)
+		{
+			ttarget = startPos;//tray
+			tray = true;
+			pros::delay(300);
+		}
+		else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B) && tray == true)
 		{
 			ttarget = finalPos;//tray
 			tray = false;
 			pros::delay(300);
 		}
-		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B) && tray == false)
+		else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B) && tray == false)
 		{
 			ttarget = startPos;//tray
 			tray = true;
@@ -138,6 +162,14 @@ void liftControl (void * param)
 			trayBool = true;
 			pros::delay(300);
 		}
+		if(liftDown == true && lift.get_position() < 15)
+		{
+			lift.move(-10);
+		}
+		pros::lcd::print(0, "pos : %d", intakeSense.get_value());
+
+
+
 		pros::delay(20);
 	}
 
@@ -188,6 +220,10 @@ drive.resetRightEncoder();
 		tpower = terror * tkp + tki * ttotalError;
 		if(terror > 220)
 			tpower = 127;
+	 if(terror > 80 && ttarget == midPos)
+				tpower = 127;
+//		if(terror < 10 && terror > -10 && ttarget != startPos)
+	//		tpower = 0;
 		tilter.move(tpower);
 		//tilter pi loop ^^^^
 

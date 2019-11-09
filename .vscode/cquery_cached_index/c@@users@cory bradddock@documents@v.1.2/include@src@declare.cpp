@@ -18,11 +18,11 @@ pros::ADIDigitalIn leftClick('e');
 pros::ADIAnalogIn intakeSense('d');
 
 int startPos = 1;
-int finalPos = 558;
+int finalPos = 556;
 int midPos = 270;
 
 int restPos = 5;
-int lowTower = 360;
+int lowTower = 350;
 int highTower = 470;
 
 double tkp = .2;

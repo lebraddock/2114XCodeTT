@@ -282,40 +282,39 @@ void skills()
   drive.stopDriveMotors();
   setIntake(127);
   drive.driveForward(41, 30, 50);
-  pros::delay(700);
+  pros::delay(1000);
   setIntake(0);
-  drive.turnRight(22, 25, 40);
+  drive.turnRight(23, 25, 40);
   liftMed();
   pros::delay(1200);
   drive.driveForward(9, 10, 20);
   setIntake(-90);
   pros::delay(500);
-  int timeOut;
   setIntake(0);
   drive.driveBackward(10, 25, 50);
   liftLow();
   pros::delay(1000);
-  drive.turnLeft(150, 20, 40);
+  drive.turnLeft(148, 20, 40);
   liftMed();
   pros::delay(1200);
   drive.driveForward(14, 20, 30);
-  setIntake(-80);
+  setIntake(-90);
   pros::delay(500);
   setIntake(0);
   drive.driveBackward(10, 20, 30);
   drive.turnRight(87, 30, 50);
   liftLow();
-  drive.driveBackward(42, 35, 50);//45
-  drive.turnRight(45, 25, 35);
+  drive.driveBackward(45, 35, 50);
+  drive.turnRight(42, 25, 35);
   setIntake(127);
   drive.driveForward(36, 35, 50);
-  timeOut = pros::millis() + 700;
+  int timeOut = pros::millis() + 700;
   while(isIntake() && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
   setIntake(0);
-  drive.turnLeft(150, 25, 18);
+  drive.turnLeft(145, 25, 18);
   setIntake(-70);
   timeOut = pros::millis() + 700;
   while(!(isIntake()) && pros::millis() < timeOut)
@@ -328,13 +327,11 @@ void skills()
   drive.setRightDrive(20);
   deploy();
 
-
-  setIntake(-125);
-  drive.driveBackward(12, 30, 50);
-  pros::delay(200);
-  drive.turnLeft(155, 30, 40);
+  setIntake(-127);
+  drive.driveBackward(20, 50, 100);
+  drive.turnLeft(160, 30, 40);
   setIntake(127);
-  drive.driveForward(28, 30, 70);
+  drive.driveForward(16, 40, 70);
   pros::delay(300);
   drive.driveBackward(6, 13, 20);
   setIntake(0);
@@ -345,7 +342,7 @@ void skills()
   setIntake(0);
   drive.driveBackward(8, 23, 40);
   liftLow();
-  drive.turnLeft(97, 30, 50);
+  drive.turnLeft(93, 30, 50);
   drive.driveBackward(24, 13, 30);
   drive.stopDriveMotors();
 

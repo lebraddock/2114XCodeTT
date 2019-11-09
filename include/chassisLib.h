@@ -363,7 +363,7 @@ class chassisStandard
       setLeftDrive(power);
       setRightDrive(power);
     }
-    stopDriveVelocity();
+    stopDriveVelocity();stopDriveMotors();
   }
 
 
@@ -468,7 +468,7 @@ class chassisStandard
       setLeftDrive(-1 * power);
       setRightDrive(power);
     }
-    stopDriveVelocity();
+    stopDriveVelocity();stopDriveMotors();
   }
 
 
@@ -574,7 +574,7 @@ class chassisStandard
       setLeftDrive(power);
       setRightDrive(-1 * power);
     }
-    stopDriveVelocity();
+    stopDriveVelocity();stopDriveMotors();
   }
 
   void driveBackward(double inches, double velocity, double acceleration)
@@ -671,7 +671,7 @@ class chassisStandard
       setLeftDrive(power);
       setRightDrive(power);
     }
-    stopDriveVelocity();
+    stopDriveVelocity();stopDriveMotors();
   }
 
 float calculateVelAcc()
