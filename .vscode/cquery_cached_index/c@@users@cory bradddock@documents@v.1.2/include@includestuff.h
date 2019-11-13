@@ -14,6 +14,7 @@ extern pros::ADIDigitalIn lineSense;
 extern pros::ADIDigitalIn rightClick;
 extern pros::ADIDigitalIn leftClick;
 extern pros::ADIDigitalIn intakeSense;
+extern pros::Task angle;
 
 extern double tkp;
 extern double tki;

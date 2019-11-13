@@ -33,7 +33,7 @@ void intakeThing()
 }
 void trayIntake()
 {
-	while(pros::millis() < trayTime)
+	while(pros::millis() < trayTime && master.get_digital(pros::E_CONTROLLER_DIGITAL_R1) != 1)
 	{
 		float num = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y)+master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y)/2;
 		intake1.move(num);
@@ -73,7 +73,8 @@ void intakeControl(void * param)
 			else{
 			intake1.move(-127);
 			intake2.move(-127);
-			}
+
+		}
 		}
 		else if(ttarget == startPos && lift.get_position() > 75 && isCube())
 		{
@@ -108,7 +109,7 @@ void liftControl (void * param)
 					tray = true;
 					if(tilter.get_position() > 30)
 						pros::delay(500);
-					if(isCube() == true)
+					if(isCube() == true  && lift.get_position() < 50)
 						intakeThing();
 					lift.move_absolute(highTower, 127);
 					liftDown = false;
@@ -120,7 +121,7 @@ void liftControl (void * param)
 					tray = true;
 					if(tilter.get_position() > 30)
 						pros::delay(500);
-					if(isCube() == true)
+					if(isCube() == true && lift.get_position() < 50)
 						intakeThing();
 					lift.move_absolute(lowTower, 127);
 					liftDown = false;
@@ -166,7 +167,7 @@ void liftControl (void * param)
 		{
 			lift.move(-10);
 		}
-		pros::lcd::print(0, "pos : %d", intakeSense.get_value());
+		pros::lcd::print(0, "pos : %f", tilter.get_position());
 
 
 
@@ -198,6 +199,9 @@ drive.resetRightEncoder();
                 TASK_STACK_DEPTH_DEFAULT, "Lift and Intake Control");
 	pros::Task task2 (intakeControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
                 TASK_STACK_DEPTH_DEFAULT, "Lift and Intake Control");
+
+angle.remove();
+
 	while (true) {
 		pros::lcd::print(1, "test %f", .2);
 		drive.tankDrive(master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y), master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y));
@@ -213,6 +217,8 @@ drive.resetRightEncoder();
 		//tilter pi loop
 		terror = ttarget - tilter.get_position();
 		ttotalError += terror;
+		if(ttotalError > 12000)
+			ttotalError = 12000;
 		tsign = signchk(terror);
 		if(tsign != tlastSign)
 			ttotalError = 0;
@@ -222,6 +228,10 @@ drive.resetRightEncoder();
 			tpower = 127;
 	 if(terror > 80 && ttarget == midPos)
 				tpower = 127;
+		/*if(tpower > 0 && tpower < 20)
+			tpower = 20;
+		if(tpower < 0 && tpower > -20)
+			tpower = -20;*/
 //		if(terror < 10 && terror > -10 && ttarget != startPos)
 	//		tpower = 0;
 		tilter.move(tpower);
