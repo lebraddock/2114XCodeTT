@@ -60,7 +60,9 @@ intake2.set_brake_mode(pros::E_MOTOR_BRAKE_HOLD);
  * the VEX Competition Switch, following either autonomous or opcontrol. When
  * the robot is enabled, this task will exit.
  */
-void disabled() {}
+void disabled() {
+	//angle.remove();
+}
 
 /**
  * Runs after initialize(), and before autonomous when connected to the Field

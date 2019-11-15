@@ -200,7 +200,7 @@ drive.resetRightEncoder();
 	pros::Task task2 (intakeControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
                 TASK_STACK_DEPTH_DEFAULT, "Lift and Intake Control");
 
-angle.remove();
+ //if everthing dies delete this :)
 
 	while (true) {
 		pros::lcd::print(1, "test %f", .2);
@@ -217,8 +217,8 @@ angle.remove();
 		//tilter pi loop
 		terror = ttarget - tilter.get_position();
 		ttotalError += terror;
-		if(ttotalError > 12000)
-			ttotalError = 12000;
+		//if(ttotalError > 12000)
+		//	ttotalError = 12000;
 		tsign = signchk(terror);
 		if(tsign != tlastSign)
 			ttotalError = 0;
@@ -226,6 +226,8 @@ angle.remove();
 		tpower = terror * tkp + tki * ttotalError;
 		if(terror > 220)
 			tpower = 127;
+		if(tpower < -90)
+			tpower = -90;
 	 if(terror > 80 && ttarget == midPos)
 				tpower = 127;
 		/*if(tpower > 0 && tpower < 20)

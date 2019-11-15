@@ -140,7 +140,8 @@ void liftLow()
    tpower = terror * atkp + atki * ttotalError;
    if(terror > 220)
      tpower = 127;
-   tilter.move(tpower);
+     if(pros::competition::is_autonomous())
+      tilter.move(tpower);
    pros::delay(20);
     }
  }
