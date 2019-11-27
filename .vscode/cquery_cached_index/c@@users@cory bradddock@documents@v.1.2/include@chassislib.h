@@ -349,10 +349,22 @@ class chassisStandard
       setRightVelocity((driveArray[i] + driveArray[i+1]) / 2);
       pros::delay(10);
     }
-    double error = 0;
+    double error = 100;
     double kp = .35;
     int power;
-    while(pros::millis() < targetTime + 400)
+    while((error > 15 || error < -15) && pros::millis() < targetTime + 700)
+    {
+      error = degrees - (getLeftEncoder() + getRightEncoder())/2;
+      power = kp * error;
+      if(abs(power) < 5)
+      {
+        power = 5 * checkSign(error);
+      }
+      setLeftDrive(power);
+      setRightDrive(power);
+    }
+    targetTime = pros::millis();
+    while(pros::millis() < targetTime + 100)
     {
       error = degrees - (getLeftEncoder() + getRightEncoder())/2;
       power = kp * error;
@@ -454,12 +466,24 @@ class chassisStandard
       setRightVelocity((driveArray[i] + driveArray[i+1]) / 2);
       pros::delay(10);
     }
-    double error = 0;
-    double kp = .35;
+    double error = 100;
+    double kp = .55;
     int power;
-    while(pros::millis() < targetTime + 400)
+    while((error > 25 || error < -25) && pros::millis() < targetTime + 700)
     {
-      error = degrees - getRightEncoder();
+      error = degrees - (-1 * getLeftEncoder() + getRightEncoder())/2;
+      power = kp * error;
+      if(abs(power) < 5)
+      {
+        power = 5 * checkSign(error);
+      }
+      setLeftDrive(-1 * power);
+      setRightDrive(power);
+    }
+    targetTime = pros::millis();
+    while(pros::millis() < targetTime + 100)
+    {
+      error = degrees - (-1 * getLeftEncoder() + getRightEncoder())/2;
       power = kp * error;
       if(abs(power) < 5)
       {
@@ -560,12 +584,24 @@ class chassisStandard
       setRightVelocity(-1 * (driveArray[i] + driveArray[i+1]) / 2);
       pros::delay(10);
     }
-    double error = 0;
-    double kp = .35;
+    double error = 100;
+    double kp = .55;
     int power;
-    while(pros::millis() < targetTime + 400)
+    while((error > 15 || error < -15) && pros::millis() < targetTime + 700)
     {
-      error = degrees - getLeftEncoder();
+      error = degrees - (getLeftEncoder() - getRightEncoder())/2;
+      power = kp * error;
+      if(abs(power) < 5)
+      {
+        power = 5 * checkSign(error);
+      }
+      setLeftDrive(power);
+      setRightDrive(-1 * power);
+    }
+    targetTime = pros::millis();
+    while(pros::millis() < targetTime + 100)
+    {
+      error = degrees - (getLeftEncoder() - getRightEncoder())/2;
       power = kp * error;
       if(abs(power) < 5)
       {
@@ -657,10 +693,22 @@ class chassisStandard
       setRightVelocity( -1 * (driveArray[i] + driveArray[i+1]) / 2);
       pros::delay(10);
     }
-    double error = 0;
-    double kp = .35;
+    double error = 100;
+    double kp = .55;
     int power;
-    while(pros::millis() < targetTime + 400)
+    while((error > 15 || error < -15) && pros::millis() < targetTime + 700)
+    {
+      error = degrees - (getLeftEncoder() + getRightEncoder())/2;
+      power = kp * error;
+      if(abs(power) < 5)
+      {
+        power = 5 * checkSign(error);
+      }
+      setLeftDrive(power);
+      setRightDrive(power);
+    }
+    targetTime = pros::millis();
+    while(pros::millis() < targetTime + 100)
     {
       error = degrees - (getLeftEncoder() + getRightEncoder())/2;
       power = kp * error;

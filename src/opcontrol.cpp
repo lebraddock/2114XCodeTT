@@ -91,6 +91,19 @@ void intakeControl(void * param)
 			intake1.move(0);
 			intake2.move(0);
 		}
+		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_X))
+		{
+			int timeOut = pros::millis() + 700;
+			intake1.move(-70);
+			intake2.move(-70);
+		  while(!(isIntake()) && pros::millis() < timeOut)
+		  {
+		    pros::delay(20);
+		  }
+			pros::delay(50);
+			intake1.move(0);
+			intake2.move(0);
+		}
 		pros::delay(20);
 	}
 	pros::delay(20);
@@ -137,6 +150,7 @@ void liftControl (void * param)
 				liftDown = true;
 				lift.tare_position();
 			}
+
 		if(master.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN) && ttarget == startPos)
 		{
 			ttarget = midPos;//tray
@@ -151,6 +165,19 @@ void liftControl (void * param)
 		}
 		else if(master.get_digital(pros::E_CONTROLLER_DIGITAL_B) && tray == true)
 		{
+			intakeBool = false;
+			int timeOut = pros::millis() + 700;
+
+		  while(!(isIntake()) && pros::millis() < timeOut)
+		  {
+				intake1.move(-70);
+				intake2.move(-70);
+		    pros::delay(20);
+		  }
+			pros::delay(50);
+			intake1.move(0);
+			intake2.move(0);
+			intakeBool = true;
 			ttarget = finalPos;//tray
 			tray = false;
 			pros::delay(300);
@@ -195,6 +222,55 @@ int tlastSign = 1;
 drive.resetLeftEncoder();
 drive.resetRightEncoder();
 
+if(autoNum == 5)
+{
+
+intake1.move(-127);
+intake2.move(-127);
+pros::delay(140);
+intake1.move(0);
+intake2.move(0);
+pros::delay(100);
+intake1.move(127);
+intake2.move(127);
+pros::delay(300);
+int timeOut = pros::millis() + 700;
+
+while(!(isIntake()) && pros::millis() < timeOut)
+{
+	intake1.move(-70);
+	intake2.move(-70);
+	pros::delay(20);
+}
+pros::delay(50);
+intake1.move(0);
+intake2.move(0);
+lift.move_absolute(lowTower, 127);
+liftDown = false;
+drive.driveForward(18, 40, 70);
+intake1.move(-80);
+intake2.move(-80);
+pros::delay(500);
+intake1.move(0);
+intake2.move(0);
+//drive.driveBackward(16, 40, 70);
+drive.setLeftVelocity(-20.8);
+drive.setRightVelocity(-27.86);
+while(liftSense.get_value() != 1)
+{
+	lift.move(-127);
+}
+lift.move(0);
+liftDown = true;
+lift.tare_position();
+pros::delay(400);
+drive.setLeftDrive(0);
+drive.setRightDrive(0);
+
+
+
+}
+
 	pros::Task task1 (liftControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
                 TASK_STACK_DEPTH_DEFAULT, "Lift and Intake Control");
 	pros::Task task2 (intakeControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
@@ -217,17 +293,17 @@ drive.resetRightEncoder();
 		//tilter pi loop
 		terror = ttarget - tilter.get_position();
 		ttotalError += terror;
-		//if(ttotalError > 12000)
-		//	ttotalError = 12000;
+		//if(ttotalError > 20000)
+		//	ttotalError = 20000;
 		tsign = signchk(terror);
 		if(tsign != tlastSign)
 			ttotalError = 0;
 		tlastSign = tsign;
 		tpower = terror * tkp + tki * ttotalError;
-		if(terror > 220)
+		if(terror > 220) //320
 			tpower = 127;
-		if(tpower < -90)
-			tpower = -90;
+		if(tpower < -127)
+			tpower = -127;
 	 if(terror > 80 && ttarget == midPos)
 				tpower = 127;
 		/*if(tpower > 0 && tpower < 20)

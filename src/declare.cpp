@@ -18,16 +18,16 @@ pros::ADIDigitalIn leftClick('e');
 pros::ADIAnalogIn intakeSense('d');
 
 int startPos = 1;
-int finalPos = 555;
-int midPos = 270;
+int finalPos = 560;
+int midPos = 340;
 
 int restPos = 5;
-int lowTower = 360;
+int lowTower = 366;
 int highTower = 470;
 
-double tkp = .22; //.35;
-double atkp = .35;
-double tki = .0012;
+double tkp = .22; //.35;  .22
+double atkp = .22;
+double tki = .0012; //.0012
 double atki = .0014;
 
 bool tray = true;
@@ -37,7 +37,7 @@ int trayTime = 0;
 int ttarget = startPos;
  	bool liftDown = true;
 
-  int autoNum = 5;
+  int autoNum = 1;
 
 int signchk(double number)
 {
