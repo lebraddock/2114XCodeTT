@@ -26,7 +26,7 @@ void intakeThing()
 	lift.move(127);
 	intake1.move(-127);
 	intake2.move(-127);
-	pros::delay(200);
+	pros::delay(180);
 	intake1.move(0);
 	intake2.move(0);
 	intakeBool = true;
@@ -224,7 +224,13 @@ drive.resetRightEncoder();
 
 if(autoNum == 5)
 {
-
+	while(liftSense.get_value() != 1)
+	{
+		lift.move(-127);
+		pros::delay(20);
+	}
+	lift.move(0);
+	lift.tare_position();
 intake1.move(-127);
 intake2.move(-127);
 pros::delay(140);
@@ -254,11 +260,12 @@ pros::delay(500);
 intake1.move(0);
 intake2.move(0);
 //drive.driveBackward(16, 40, 70);
-drive.setLeftVelocity(-20.8);
+drive.setLeftVelocity(-23.8);
 drive.setRightVelocity(-27.86);
 while(liftSense.get_value() != 1)
 {
 	lift.move(-127);
+	pros::delay(20);
 }
 lift.move(0);
 liftDown = true;

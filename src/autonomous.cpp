@@ -84,18 +84,22 @@ void followRedPath()
 
 void liftHigh()
 {
+  liftDown = false;
+  pros::delay(50);
   if(isCube() == true)
     intakeThing();
   lift.move_absolute(highTower, 100);
-  liftDown = false;
+
 }
 
 void liftMed()
 {
+  liftDown = false;
+  pros::delay(50);
   if(isCube() == true)
     intakeThing();
   lift.move_absolute(lowTower, 100);
-  liftDown = false;
+
 }
 void liftLow()
 {
@@ -133,6 +137,11 @@ void liftLow()
 
    while(true)
    {
+     if(liftDown == true && pros::competition::is_autonomous())
+     {
+       if(liftSense.get_value() == 0)
+        lift.move(-127);
+     }
    //tilter pi loop
    terror = ttarget - tilter.get_position();
    ttotalError += terror;
@@ -165,7 +174,7 @@ void deploy()
   ttarget = finalPos;
   setIntake(0);
 
-    pros::delay(1700);
+    pros::delay(1300);
     setIntake(30);
     pros::delay(300);
     setIntake(0);
@@ -263,31 +272,41 @@ void blueStack()
   setIntake(127);
   pros::delay(50);
   drive.stopDriveMotors();
-  drive.driveForward(43,25,38);
+  drive.driveForward(43,30,50);
   setIntake(0);
   followBluePath();
   setIntake(127);
-  drive.driveForward(38, 35, 40);
+  drive.driveForward(38, 30, 45);
   int timeOut = pros::millis() + 700;
-  while((isIntake()) && pros::millis() < timeOut)
+  while(isIntake() && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
   setIntake(0);
-  drive.turnLeft(148, 25, 18);
-  setIntake(-90);
+  drive.turnLeft(147, 25, 25);
+  setIntake(0);
+  intake1.move_velocity(-70);
+  intake2.move_velocity(-70);
   timeOut = pros::millis() + 700;
   while(!(isIntake()) && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
-  pros::delay(60);
+  // gamers rize up!!!!!
+  pros::delay(50);
   setIntake(0);
   ttarget = midPos;
-  setIntake(12);
   drive.driveForward(48, 40, 50);
-  drive.setLeftDrive(25);
-  drive.setRightDrive(25);
+
+  setIntake(0);
+  intake1.move_velocity(-70);
+  intake2.move_velocity(-70);
+  timeOut = pros::millis() + 700;
+  while(!(isIntake()) && pros::millis() < timeOut)
+  {
+    pros::delay(20);
+  }
+  pros::delay(50);
   setIntake(0);
   deploy2();
   setIntake(-90);
@@ -319,13 +338,16 @@ void skills()
   pros::delay(150);
   drive.stopDriveMotors();
   setIntake(127);
-  drive.driveForward(42, 30, 50);
-  pros::delay(200);
+  drive.driveForward(42, 24, 35);
+  pros::delay(350);
   setIntake(0);
-  drive.turnRight(22, 25, 40);
+  pros::delay(200);
   liftMed();
-  pros::delay(500);
-  drive.driveForward(9, 10, 20);
+  pros::delay(400);
+  drive.turnRight(24, 25, 30);
+
+  pros::delay(400);
+  drive.driveForward(8, 10, 20);
   setIntake(-90);
   pros::delay(500);
   int timeOut;
@@ -333,85 +355,87 @@ void skills()
   drive.driveBackward(10, 25, 30);
   liftLow();
   pros::delay(500);
-  drive.turnLeft(150, 20, 40);
+  drive.turnLeft(147, 20, 40);
   liftMed();
   pros::delay(500);
-  drive.driveForward(14, 20, 30);
+  drive.driveForward(12, 20, 30);
   setIntake(-80);
   pros::delay(500);
   setIntake(0);
-  drive.driveBackward(13, 20, 30);
-  drive.turnRight(136,30,50);
+  drive.driveBackward(9, 20, 30);
+  pros::delay(400);
+  drive.turnRight(128,30,50);
   liftLow();
   setIntake(127);
-  drive.driveForward(62,20,40);
-  pros::delay(100);
+  drive.driveForward(65,20,25);
   setIntake(0);
   pros::delay(300);
   liftMed();
   pros::delay(500);
-  drive.turnLeft(100, 10, 20);
-  drive.driveForward(6, 10, 20);
+  drive.turnLeft(106, 10, 20);
+  drive.driveForward(7, 10, 20);
   setIntake(-70);
   pros::delay(1000);
   setIntake(0);
-  drive.driveBackward(19, 30, 50);
-  drive.turnRight(46,30, 50);
+  drive.driveBackward(12, 30, 50);
+  drive.turnRight(47,30, 40);
   liftLow();
-  setIntake(-50);
+  pros::delay(300);
+  setIntake(-70);
   timeOut = pros::millis() + 700;
   while(!(isIntake()) && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
   setIntake(0);
-  drive.driveForward(35, 30, 50);
-  drive.setLeftDrive(20);
-  drive.setRightDrive(20);
+  drive.driveForward(26, 30, 50);
   deploy();
   setIntake(-100);
-  drive.driveBackward(11, 30, 70);
+  drive.driveBackward(9, 30, 70);
 
 
 
   drive.turnRight(150,30,30);
-  setIntake(127);
-  drive.driveForward(35, 25, 40);
-  pros::delay(300);
-  setIntake(-60);
+  drive.driveBackward(24, 30, 50);
+  pros::delay(100);
+
+  intake1.move(127);
+  intake2.move(127);
+  drive.driveForward(46, 30, 40);
+  drive.driveBackward(10, 20,30);
+  setIntake(-90);
+
   timeOut = pros::millis() + 700;
   while(!(isIntake()) && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
+  pros::delay(30);
   setIntake(0);
 
-  drive.driveBackward(10, 13,20);
+
   liftHigh();
-  drive.driveForward(13, 12, 20);
+  drive.driveForward(15, 12, 20);
   setIntake(-75);
-  pros::delay(600);
-  drive.driveBackward(22,25,40);
+  pros::delay(400);
+  drive.driveBackward(22,35,40);
 
 
-liftLow();
+
+
 setIntake(127);
-drive.turnLeft(5, 10, 30);
 followSkillsPath();
 setIntake(0);
-drive.setLeftDrive(127);
-drive.setRightDrive(127);
-pros::delay(200);
-drive.setLeftDrive(20);
-drive.setRightDrive(20);
-setIntake(-50);
- timeOut = pros::millis() + 700;
+setIntake(-90);
+
+timeOut = pros::millis() + 700;
 while(!(isIntake()) && pros::millis() < timeOut)
 {
   pros::delay(20);
 }
+pros::delay(30);
 setIntake(0);
-deploy2();
+deploy();
 setIntake(-100);
 drive.driveBackward(20,30,50);
 }
@@ -426,6 +450,7 @@ void autonomous()
                 drive.resetLeftEncoder();
                 drive.resetRightEncoder();
 
+                //drive.turnLeft(90, 35, 40);
   if(autoNum == 1)
     redStack();
   if(autoNum == 2)

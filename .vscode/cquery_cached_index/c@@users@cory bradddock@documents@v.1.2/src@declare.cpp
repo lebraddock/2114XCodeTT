@@ -27,7 +27,7 @@ int highTower = 470;
 
 double tkp = .22; //.35;  .22
 double atkp = .22;
-double tki = .0012; //.0012
+double tki = .0014; //.0012
 double atki = .0014;
 
 bool tray = true;

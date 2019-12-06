@@ -236,6 +236,14 @@ class chassisStandard
     return (pros::c::motor_get_position(rightMotor1) + pros::c::motor_get_position(rightMotor2)) / 2;
   }
 
+  double getLeftInches()
+  {
+    return getLeftEncoder() / 360 * 3.1415 * wheelDiameter * gearRatio;
+  }
+  double getRightInches()
+  {
+    return getRightEncoder() / 360 * 3.1415 * wheelDiameter * gearRatio;
+  }
   //reset encoder values
   void resetLeftEncoder()
   {
@@ -257,6 +265,16 @@ class chassisStandard
   //10ms loops opopopopop
 
 
+  double KP = .3;
+  double kp = 1; //4
+  double kd = 1.5; //1.2
+  double kv = 2.3; //.4
+  double ka = 1.2; //.38
+  double lError;
+  double lPreviousError;
+  double rError;
+  double rPreviousError;
+
   double calculateAccelerationTriangleTime(double velocity, double acceleration)
   {
     return velocity / acceleration;
@@ -269,6 +287,10 @@ class chassisStandard
 
 
   /////Drive Forward with a motion profile////////
+
+
+
+
   void driveForward(double inches, double velocity, double acceleration)
   {
     //////////////////Create the motion profile///////////////////////////
@@ -276,7 +298,7 @@ class chassisStandard
     int n = 0;
     if(inches > calculateAccelerationTriangleDistance(velocity, acceleration) * 2) //determain if it is trapezoidal or a triangular profile
       {
-    	condition = 0;
+    condition = 0;
       }
     else
       condition = 1;
@@ -297,7 +319,9 @@ class chassisStandard
 
 
     double driveArray[n]; //where the path would be stored
-
+    double positionArray[n];
+    double accelerationArray[n];
+    int totalPosition = 0;
 
     if(condition == 0) //create trapezoidal path
     {
@@ -307,16 +331,25 @@ class chassisStandard
       for(int i = 0; i < accelerationTime; i++)
       {
         driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
       }
       for(int i = (int)accelerationTime; i < accelerationTime + boxTime; i++)
       {
         driveArray[i] = velocity;
+        totalPosition = velocity * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = 0;
       }
       double count = .01;
       for(int i = accelerationTime + boxTime; i < n; i++)
       {
         driveArray[i] = velocity - (count * acceleration);
         count = count + .01;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
       }
     }
     else // create triangular path
@@ -326,11 +359,17 @@ class chassisStandard
       for(int i = 0; i < n / 2; i++)
       {
         driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
       }
 
       for(int i = n/2; i < n; i++)
       {
         driveArray[i] = driveArray[i - 1] - acceleration * (1.0/100);
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
       }
     }
 
@@ -342,45 +381,153 @@ class chassisStandard
     int targetTime = pros::millis() + (n * 10);
     resetLeftEncoder();
     resetRightEncoder();
+    double lPower;
+    double rPower;
+    lPreviousError = degrees;
+    rPreviousError = degrees;
     while(pros::millis() < targetTime)
     {
       i = (pros::millis() - startTime) / 10;
-      setLeftVelocity((driveArray[i] + driveArray[i+1]) / 2);
-      setRightVelocity((driveArray[i] + driveArray[i+1]) / 2);
+      lError = positionArray[i] - getLeftInches();
+      rError = positionArray[i] - getRightInches();
+      lPower = driveArray[i+1];
+      rPower = driveArray[i+1];
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
       pros::delay(10);
     }
-    double error = 100;
-    double kp = .35;
-    int power;
-    while((error > 15 || error < -15) && pros::millis() < targetTime + 700)
+    while(pros::millis() < targetTime + 350)
     {
-      error = degrees - (getLeftEncoder() + getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(power);
-      setRightDrive(power);
+      lError = inches - getLeftInches();
+      rError = inches - getRightInches();
+      lPower = lError * KP;
+      rPower = rError * KP;
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
+      pros::delay(10);
     }
-    targetTime = pros::millis();
-    while(pros::millis() < targetTime + 100)
-    {
-      error = degrees - (getLeftEncoder() + getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(power);
-      setRightDrive(power);
-    }
-    stopDriveVelocity();stopDriveMotors();
+    stopDriveVelocity();
   }
 
 
+  void driveBackward(double inches, double velocity, double acceleration)
+  {
+    //////////////////Create the motion profile///////////////////////////
+    int condition = 0;
+    int n = 0;
+    if(inches > calculateAccelerationTriangleDistance(velocity, acceleration) * 2) //determain if it is trapezoidal or a triangular profile
+      {
+    condition = 0;
+      }
+    else
+      condition = 1;
+
+    if(condition == 0) //if trapezoidal
+    {
+      double boxDistance = inches - (calculateAccelerationTriangleDistance(velocity, acceleration) * 2);
+      double boxTime = boxDistance / velocity;
+      double accelerationTime = calculateAccelerationTriangleTime(velocity, acceleration);
+      n = (int)((accelerationTime * 2 + boxTime) * 100);
+    }
+    else
+    {
+      double triangleTarget = inches / 2;
+      double triangleTime = sqrt(2 * triangleTarget / acceleration);
+      n = (int)(triangleTime * 200);
+    }
 
 
+    double driveArray[n]; //where the path would be stored
+    double positionArray[n];
+    double accelerationArray[n];
+    int totalPosition = 0;
+
+    if(condition == 0) //create trapezoidal path
+    {
+      double boxDistance = inches - (calculateAccelerationTriangleDistance(velocity, acceleration) * 2);
+      int boxTime = (int)((boxDistance / velocity) * 100);
+      int accelerationTime = (int)(calculateAccelerationTriangleTime(velocity, acceleration) * 100);
+      for(int i = 0; i < accelerationTime; i++)
+      {
+        driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
+      }
+      for(int i = (int)accelerationTime; i < accelerationTime + boxTime; i++)
+      {
+        driveArray[i] = velocity;
+        totalPosition = velocity * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = 0;
+      }
+      double count = .01;
+      for(int i = accelerationTime + boxTime; i < n; i++)
+      {
+        driveArray[i] = velocity - (count * acceleration);
+        count = count + .01;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
+      }
+    }
+    else // create triangular path
+    {
+      double triangleTarget = inches / 2;
+      int triangleTime = (int)(sqrt(2 * triangleTarget / acceleration) * 100);
+      for(int i = 0; i < n / 2; i++)
+      {
+        driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
+      }
+
+      for(int i = n/2; i < n; i++)
+      {
+        driveArray[i] = driveArray[i - 1] - acceleration * (1.0/100);
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
+      }
+    }
+
+    ////////////Follow Motion Path///////////////
+
+    double degrees = inches * 360 / (3.1415 * wheelDiameter * gearRatio);
+    int i = 0;
+    int startTime = pros::millis();
+    int targetTime = pros::millis() + (n * 10);
+    inches = inches * -1;
+    resetLeftEncoder();
+    resetRightEncoder();
+    double lPower;
+    double rPower;
+    lPreviousError = degrees;
+    rPreviousError = degrees;
+    while(pros::millis() < targetTime)
+    {
+      i = (pros::millis() - startTime) / 10;
+      lError = positionArray[i] * -1 - getLeftInches();
+      rError = positionArray[i] * -1  - getRightInches();
+      lPower = driveArray[i + 1] * -1;
+      rPower = driveArray[i + 1] * -1;
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
+      pros::delay(10);
+    }
+    while(pros::millis() < targetTime + 350)
+    {
+      lError = inches - getLeftInches();
+      rError = inches - getRightInches();
+      lPower = lError * KP * -1;
+      rPower = rError * KP * -1;
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
+      pros::delay(10);
+    }
+    stopDriveVelocity();
+  }
 
 
   void turnLeft(double angle, double velocity, double acceleration)
@@ -391,9 +538,12 @@ class chassisStandard
 
     double inches = (angle * 3.1415 * chassisWidth)/360;
 
+
+    //////////////////Create the motion profile///////////////////////////
+
     if(inches > calculateAccelerationTriangleDistance(velocity, acceleration) * 2) //determain if it is trapezoidal or a triangular profile
       {
-      condition = 0;
+    condition = 0;
       }
     else
       condition = 1;
@@ -414,7 +564,9 @@ class chassisStandard
 
 
     double driveArray[n]; //where the path would be stored
-
+    double positionArray[n];
+    double accelerationArray[n];
+    int totalPosition = 0;
 
     if(condition == 0) //create trapezoidal path
     {
@@ -424,16 +576,25 @@ class chassisStandard
       for(int i = 0; i < accelerationTime; i++)
       {
         driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
       }
       for(int i = (int)accelerationTime; i < accelerationTime + boxTime; i++)
       {
         driveArray[i] = velocity;
+        totalPosition = velocity * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = 0;
       }
       double count = .01;
       for(int i = accelerationTime + boxTime; i < n; i++)
       {
         driveArray[i] = velocity - (count * acceleration);
         count = count + .01;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
       }
     }
     else // create triangular path
@@ -443,11 +604,17 @@ class chassisStandard
       for(int i = 0; i < n / 2; i++)
       {
         driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
       }
 
       for(int i = n/2; i < n; i++)
       {
         driveArray[i] = driveArray[i - 1] - acceleration * (1.0/100);
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
       }
     }
 
@@ -459,40 +626,32 @@ class chassisStandard
     int targetTime = pros::millis() + (n * 10);
     resetLeftEncoder();
     resetRightEncoder();
+    double lPower;
+    double rPower;
+    lPreviousError = degrees;
+    rPreviousError = degrees;
     while(pros::millis() < targetTime)
     {
       i = (pros::millis() - startTime) / 10;
-      setLeftVelocity(-1 * (driveArray[i] + driveArray[i+1]) / 2);
-      setRightVelocity((driveArray[i] + driveArray[i+1]) / 2);
+      lError = positionArray[i]* -1 - getLeftInches();
+      rError = positionArray[i] - getRightInches();
+      lPower = driveArray[i + 1]* -1;
+      rPower = driveArray[i + 1];
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
       pros::delay(10);
     }
-    double error = 100;
-    double kp = .55;
-    int power;
-    while((error > 25 || error < -25) && pros::millis() < targetTime + 700)
+    while(pros::millis() < targetTime + 350)
     {
-      error = degrees - (-1 * getLeftEncoder() + getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(-1 * power);
-      setRightDrive(power);
+      lError = inches* -1 - getLeftInches();
+      rError = inches - getRightInches();
+      lPower = lError * KP;
+      rPower = rError * KP;
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
+      pros::delay(10);
     }
-    targetTime = pros::millis();
-    while(pros::millis() < targetTime + 100)
-    {
-      error = degrees - (-1 * getLeftEncoder() + getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(-1 * power);
-      setRightDrive(power);
-    }
-    stopDriveVelocity();stopDriveMotors();
+    stopDriveVelocity();
   }
 
 
@@ -509,9 +668,12 @@ class chassisStandard
 
     double inches = (angle * 3.1415 * chassisWidth)/360;
 
+
+    //////////////////Create the motion profile///////////////////////////
+
     if(inches > calculateAccelerationTriangleDistance(velocity, acceleration) * 2) //determain if it is trapezoidal or a triangular profile
       {
-      condition = 0;
+    condition = 0;
       }
     else
       condition = 1;
@@ -532,7 +694,9 @@ class chassisStandard
 
 
     double driveArray[n]; //where the path would be stored
-
+    double positionArray[n];
+    double accelerationArray[n];
+    int totalPosition = 0;
 
     if(condition == 0) //create trapezoidal path
     {
@@ -542,16 +706,25 @@ class chassisStandard
       for(int i = 0; i < accelerationTime; i++)
       {
         driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
       }
       for(int i = (int)accelerationTime; i < accelerationTime + boxTime; i++)
       {
         driveArray[i] = velocity;
+        totalPosition = velocity * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = 0;
       }
       double count = .01;
       for(int i = accelerationTime + boxTime; i < n; i++)
       {
         driveArray[i] = velocity - (count * acceleration);
         count = count + .01;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
       }
     }
     else // create triangular path
@@ -561,11 +734,17 @@ class chassisStandard
       for(int i = 0; i < n / 2; i++)
       {
         driveArray[i] = (i /100.0) * acceleration;
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = acceleration;
       }
 
       for(int i = n/2; i < n; i++)
       {
         driveArray[i] = driveArray[i - 1] - acceleration * (1.0/100);
+        totalPosition = totalPosition + driveArray[i] * .01;
+        positionArray[i] = totalPosition;
+        accelerationArray[i] = -1 * acceleration;
       }
     }
 
@@ -577,150 +756,34 @@ class chassisStandard
     int targetTime = pros::millis() + (n * 10);
     resetLeftEncoder();
     resetRightEncoder();
+    double lPower;
+    double rPower;
+    lPreviousError = degrees;
+    rPreviousError = degrees;
     while(pros::millis() < targetTime)
     {
       i = (pros::millis() - startTime) / 10;
-      setLeftVelocity((driveArray[i] + driveArray[i+1]) / 2);
-      setRightVelocity(-1 * (driveArray[i] + driveArray[i+1]) / 2);
+      lError = positionArray[i] - getLeftInches();
+      rError = positionArray[i]* -1 - getRightInches();
+      lPower = driveArray[i + 1];
+      rPower = driveArray[i + 1]* -1;
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
       pros::delay(10);
     }
-    double error = 100;
-    double kp = .55;
-    int power;
-    while((error > 15 || error < -15) && pros::millis() < targetTime + 700)
+    while(pros::millis() < targetTime + 350)
     {
-      error = degrees - (getLeftEncoder() - getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(power);
-      setRightDrive(-1 * power);
-    }
-    targetTime = pros::millis();
-    while(pros::millis() < targetTime + 100)
-    {
-      error = degrees - (getLeftEncoder() - getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(power);
-      setRightDrive(-1 * power);
-    }
-    stopDriveVelocity();stopDriveMotors();
-  }
-
-  void driveBackward(double inches, double velocity, double acceleration)
-  {
-    //////////////////Create the motion profile///////////////////////////
-    int condition = 0;
-    int n = 0;
-    if(inches > calculateAccelerationTriangleDistance(velocity, acceleration) * 2) //determain if it is trapezoidal or a triangular profile
-      {
-    	condition = 0;
-      }
-    else
-      condition = 1;
-
-    if(condition == 0) //if trapezoidal
-    {
-      double boxDistance = inches - (calculateAccelerationTriangleDistance(velocity, acceleration) * 2);
-      double boxTime = boxDistance / velocity;
-      double accelerationTime = calculateAccelerationTriangleTime(velocity, acceleration);
-      n = (int)((accelerationTime * 2 + boxTime) * 100);
-    }
-    else
-    {
-      double triangleTarget = inches / 2;
-      double triangleTime = sqrt(2 * triangleTarget / acceleration);
-      n = (int)(triangleTime * 200);
-    }
-
-
-    double driveArray[n]; //where the path would be stored
-
-
-    if(condition == 0) //create trapezoidal path
-    {
-      double boxDistance = inches - (calculateAccelerationTriangleDistance(velocity, acceleration) * 2);
-      int boxTime = (int)((boxDistance / velocity) * 100);
-      int accelerationTime = (int)(calculateAccelerationTriangleTime(velocity, acceleration) * 100);
-      for(int i = 0; i < accelerationTime; i++)
-      {
-        driveArray[i] = (i /100.0) * acceleration;
-      }
-      for(int i = (int)accelerationTime; i < accelerationTime + boxTime; i++)
-      {
-        driveArray[i] = velocity;
-      }
-      double count = .01;
-      for(int i = accelerationTime + boxTime; i < n; i++)
-      {
-        driveArray[i] = velocity - (count * acceleration);
-        count = count + .01;
-      }
-    }
-    else // create triangular path
-    {
-      double triangleTarget = inches / 2;
-      int triangleTime = (int)(sqrt(2 * triangleTarget / acceleration) * 100);
-      for(int i = 0; i < n / 2; i++)
-      {
-        driveArray[i] = (i /100.0) * acceleration;
-      }
-
-      for(int i = n/2; i < n; i++)
-      {
-        driveArray[i] = driveArray[i - 1] - acceleration * (1.0/100);
-      }
-    }
-
-    ////////////Follow Motion Path///////////////
-
-    double degrees = -1 * inches * 360 / (3.1415 * wheelDiameter * gearRatio);
-    int i = 0;
-    int startTime = pros::millis();
-    int targetTime = pros::millis() + (n * 10);
-    resetLeftEncoder();
-    resetRightEncoder();
-    while(pros::millis() < targetTime)
-    {
-      i = (pros::millis() - startTime) / 10;
-      setLeftVelocity( -1 * (driveArray[i] + driveArray[i+1]) / 2);
-      setRightVelocity( -1 * (driveArray[i] + driveArray[i+1]) / 2);
+      lError = inches - getLeftInches();
+      rError = inches* -1 - getRightInches();
+      lPower = lError * KP;
+      rPower = rError * KP;
+      setLeftVelocity(lPower);
+      setRightVelocity(rPower);
       pros::delay(10);
     }
-    double error = 100;
-    double kp = .55;
-    int power;
-    while((error > 15 || error < -15) && pros::millis() < targetTime + 700)
-    {
-      error = degrees - (getLeftEncoder() + getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(power);
-      setRightDrive(power);
-    }
-    targetTime = pros::millis();
-    while(pros::millis() < targetTime + 100)
-    {
-      error = degrees - (getLeftEncoder() + getRightEncoder())/2;
-      power = kp * error;
-      if(abs(power) < 5)
-      {
-        power = 5 * checkSign(error);
-      }
-      setLeftDrive(power);
-      setRightDrive(power);
-    }
-    stopDriveVelocity();stopDriveMotors();
+    stopDriveVelocity();
   }
+
 
 float calculateVelAcc()
 {
