@@ -49,6 +49,84 @@ void followSkillsPath()
 }
 
 
+void Align()
+{
+  double akp = .08;
+  double aki = .0006;
+  double aerror;
+  double atotalError;
+  int sign;
+  int lastSign = 0;
+  double apower;
+  int timeOut = pros::millis() + 1000;
+  while(pros::millis() < timeOut)
+  {
+    aerror = leftUltra.get_value() - rightUltra.get_value();
+    atotalError += aerror;
+    apower = aerror * akp + atotalError * aki;
+    sign = signchk(aerror);
+    if(sign != lastSign)
+      atotalError = 0;
+
+
+    drive.setLeftVelocity( -1 * apower);
+    drive.setRightVelocity(apower);
+    lastSign = sign;
+    pros::delay(20);
+  }
+  drive.setLeftVelocity(0);
+  drive.setRightVelocity(0);
+}
+double theta = 0;
+void angleCalc (void * param)
+{
+  double lastLeft = 0;
+  double lastRight = 0;
+  double dtheta = 0;
+
+  double chassisWidth = 9.8634;
+  while(true)
+  {
+
+    dtheta = ((drive.getLeftVelocity()  * .01) - (drive.getRightVelocity() * .01)) / chassisWidth;
+    theta = theta + dtheta;
+    pros::lcd::print(6, "pos : %f", theta / 6.28 * 360);
+    pros::delay(10);
+  }
+}
+
+void alignAngle(double num)
+{
+  num = num / 360 * 2 * 3.1415;
+  double akp = 4;
+  double aki = .03;
+  int sign = 0;
+  int lastSign;
+  double aerror;
+  double apower;
+  double atotalError = 0;
+  int timeOut = pros::millis() + 1000;
+  while(pros::millis() < timeOut)
+  {
+    aerror = num - theta;
+    atotalError += aerror;
+    apower = aerror * akp + atotalError * aki;
+    sign = signchk(aerror);
+    if(sign != lastSign)
+      atotalError = 0;
+
+    drive.setLeftVelocity(apower);
+    drive.setRightVelocity( -1 * apower);
+    lastSign = sign;
+    pros::delay(20);
+  }
+  drive.setLeftVelocity(0);
+  drive.setRightVelocity(0);
+}
+
+
+
+
 void followBluePath()
 {
   int i = 0;
@@ -157,6 +235,8 @@ void liftLow()
      if(pros::competition::is_autonomous())
       tilter.move(tpower);
    pros::delay(20);
+  // pros::lcd::print(7, "pos : %d", leftUltra.get_value());
+  // pros::lcd::print(6, "pos : %d", rightUltra.get_value());
     }
  }
 
@@ -209,7 +289,7 @@ void redStack()
 {
   drive.setLeftDrive(-10);
   drive.setRightDrive(-10);
-    liftLow();
+  liftLow();
   setIntake(-127);
   pros::delay(140);
   setIntake(0);
@@ -218,30 +298,41 @@ void redStack()
   setIntake(127);
   pros::delay(50);
   drive.stopDriveMotors();
-  drive.driveForward(43,30,70);
+  drive.driveForward(43,30,50);
   setIntake(0);
   followRedPath();
   setIntake(127);
-  drive.driveForward(38, 35, 60);
+  drive.driveForward(38, 25, 45);
   int timeOut = pros::millis() + 700;
-  while((isIntake()) && pros::millis() < timeOut)
+  while(isIntake() && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
   setIntake(0);
-  drive.turnRight(149, 25, 18);
-  setIntake(-70);
+  drive.turnRight(147, 25, 25);
+  setIntake(0);
+  intake1.move_velocity(-70);
+  intake2.move_velocity(-70);
   timeOut = pros::millis() + 700;
   while(!(isIntake()) && pros::millis() < timeOut)
   {
     pros::delay(20);
   }
-  setIntake(127);  pros::delay(100);setIntake(0);
+  // gamers rize up!!!!!
+  pros::delay(20);
+  setIntake(0);
   ttarget = midPos;
-  setIntake(12);
-  drive.driveForward(47, 40, 50);
-  drive.setLeftDrive(25);
-  drive.setRightDrive(25);
+  drive.driveForward(48, 40, 50);
+
+  setIntake(0);
+  intake1.move_velocity(-70);
+  intake2.move_velocity(-70);
+  timeOut = pros::millis() + 700;
+  while(!(isIntake()) && pros::millis() < timeOut)
+  {
+    pros::delay(20);
+  }
+  pros::delay(50);
   setIntake(0);
   deploy2();
   setIntake(-90);
@@ -276,7 +367,7 @@ void blueStack()
   setIntake(0);
   followBluePath();
   setIntake(127);
-  drive.driveForward(38, 30, 45);
+  drive.driveForward(38, 25, 45);
   int timeOut = pros::millis() + 700;
   while(isIntake() && pros::millis() < timeOut)
   {
@@ -293,7 +384,7 @@ void blueStack()
     pros::delay(20);
   }
   // gamers rize up!!!!!
-  pros::delay(50);
+  pros::delay(20);
   setIntake(0);
   ttarget = midPos;
   drive.driveForward(48, 40, 50);
@@ -364,21 +455,24 @@ void skills()
   setIntake(0);
   drive.driveBackward(9, 20, 30);
   pros::delay(400);
+
   drive.turnRight(128,30,50);
   liftLow();
   setIntake(127);
   drive.driveForward(65,20,25);
   setIntake(0);
+
   pros::delay(300);
+
   liftMed();
   pros::delay(500);
-  drive.turnLeft(106, 10, 20);
+  drive.turnLeft(111, 10, 20);
   drive.driveForward(7, 10, 20);
   setIntake(-70);
   pros::delay(1000);
   setIntake(0);
   drive.driveBackward(12, 30, 50);
-  drive.turnRight(47,30, 40);
+  drive.turnRight(52,30, 40);
   liftLow();
   pros::delay(300);
   setIntake(-70);
@@ -388,7 +482,7 @@ void skills()
     pros::delay(20);
   }
   setIntake(0);
-  drive.driveForward(26, 30, 50);
+  drive.driveForward(27, 30, 50);
   deploy();
   setIntake(-100);
   drive.driveBackward(9, 30, 70);
@@ -403,6 +497,8 @@ void skills()
   intake2.move(127);
   drive.driveForward(46, 30, 40);
   drive.driveBackward(10, 20,30);
+  drive.driveForward(5, 10, 20);
+  drive.driveBackward(5, 10, 20);
   setIntake(-90);
 
   timeOut = pros::millis() + 700;
@@ -418,26 +514,17 @@ void skills()
   drive.driveForward(15, 12, 20);
   setIntake(-75);
   pros::delay(400);
-  drive.driveBackward(22,35,40);
+  drive.driveBackward(25,35,40);
 
 
 
-
-setIntake(127);
+liftLow();
+setIntake(0);
 followSkillsPath();
 setIntake(0);
-setIntake(-90);
-
-timeOut = pros::millis() + 700;
-while(!(isIntake()) && pros::millis() < timeOut)
-{
-  pros::delay(20);
-}
-pros::delay(30);
-setIntake(0);
-deploy();
-setIntake(-100);
-drive.driveBackward(20,30,50);
+drive.turnLeft(130, 15,20);
+drive.driveBackward(95, 35, 60);
+drive.driveForward(20, 40, 70);
 }
 
 
@@ -447,10 +534,15 @@ void autonomous()
 {
   pros::Task angle (trayControl, (void*)"PROS", TASK_PRIORITY_DEFAULT,
                 TASK_STACK_DEPTH_DEFAULT, "Tary");
+
+ pros::Task angleCalculation (angleCalc, (void*)"PROS", TASK_PRIORITY_DEFAULT, TASK_STACK_DEPTH_DEFAULT, "on jah");
                 drive.resetLeftEncoder();
                 drive.resetRightEncoder();
 
-                //drive.turnLeft(90, 35, 40);
+
+
+
+             //drive.turnLeft(90, 35, 40);
   if(autoNum == 1)
     redStack();
   if(autoNum == 2)

@@ -194,11 +194,11 @@ class chassisStandard
     pros::c::motor_move_velocity(leftMotor1, rpm);
     pros::c::motor_move_velocity(leftMotor2, rpm);
   }
-  int getLeftVelocity()
+  double getLeftVelocity()
   {
-    int rpm = pros::c::motor_get_actual_velocity(leftMotor1) + pros::c::motor_get_actual_velocity(leftMotor2) / 2;
+    double rpm = pros::c::motor_get_actual_velocity(leftMotor1) + pros::c::motor_get_actual_velocity(leftMotor2) / 2;
     rpm = rpm * gearRatio;
-    return (rpm / (3.1315 * wheelDiameter * 60));
+    return (rpm * 3.1315 * wheelDiameter / ( 60));
   }
   void setRightVelocity(double inps)
   {
@@ -207,11 +207,11 @@ class chassisStandard
     pros::c::motor_move_velocity(rightMotor1, rpm);
     pros::c::motor_move_velocity(rightMotor2, rpm);
   }
-  int getRightVelocity()
+  double getRightVelocity()
   {
-    int rpm = pros::c::motor_get_actual_velocity(rightMotor1) + pros::c::motor_get_actual_velocity(rightMotor2);
+    double rpm = pros::c::motor_get_actual_velocity(rightMotor1) + pros::c::motor_get_actual_velocity(rightMotor2)/2;
     rpm = rpm * gearRatio;
-    return (rpm / (3.1315 * wheelDiameter * 60));
+    return (rpm * 3.1315 * wheelDiameter / ( 60));
   }
   //stahp
   void stopDriveMotors()
@@ -265,7 +265,7 @@ class chassisStandard
   //10ms loops opopopopop
 
 
-  double KP = .3;
+  double KP = 1.3; //.3
   double kp = 1; //4
   double kd = 1.5; //1.2
   double kv = 2.3; //.4

@@ -13,9 +13,11 @@ pros::ADIDigitalIn liftSense('b');
 
 pros::ADIAnalogIn lineSense('a');
 
-pros::ADIDigitalIn rightClick('c');
-pros::ADIDigitalIn leftClick('e');
+
 pros::ADIAnalogIn intakeSense('d');
+
+pros::ADIUltrasonic leftUltra('e', 'f');
+pros::ADIUltrasonic rightUltra('g', 'h');
 
 int startPos = 1;
 int finalPos = 560;

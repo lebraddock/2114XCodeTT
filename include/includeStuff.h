@@ -16,6 +16,10 @@ extern pros::ADIDigitalIn leftClick;
 extern pros::ADIDigitalIn intakeSense;
 extern pros::Task angle;
 
+
+extern pros::ADIUltrasonic leftUltra;
+extern pros::ADIUltrasonic rightUltra;
+
 extern double tkp;
 extern double tki;
 extern double atkp;

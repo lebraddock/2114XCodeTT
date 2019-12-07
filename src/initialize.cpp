@@ -80,7 +80,7 @@ void competition_initialize() {
 
 while(lcdBool)
 {
-if(pros::lcd::read_buttons() == LCD_BTN_RIGHT || rightClick.get_value() == 1)
+if(pros::lcd::read_buttons() == LCD_BTN_RIGHT)
 {
 	if(autoNum == 5)
 	autoNum = 1;
@@ -88,7 +88,7 @@ if(pros::lcd::read_buttons() == LCD_BTN_RIGHT || rightClick.get_value() == 1)
 	autoNum++;
 	pros::delay(300);
 }
-if(pros::lcd::read_buttons() == LCD_BTN_LEFT || leftClick.get_value() == 1)
+if(pros::lcd::read_buttons() == LCD_BTN_LEFT)
 {
 	if(autoNum == 1)
 	autoNum = 5;
